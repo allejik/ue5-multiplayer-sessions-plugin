@@ -1,10 +1,11 @@
 # Multiplayer Sessions Plugin UE5
 
-- Clone the content of repository into Plugins/MultiplayerSessions
+- Clone the content of repository into Plugins/MultiplayerSessions, e.g. `git clone git@github.com:allejik/ue5-multiplayer-sessions-plugin.git .`
 
 - Add to Config/DefaultGame.ini:
 
-```
+```ini
+; Fix Network Rubberbanding Lag
 [/Script/Engine.GameNetworkManager]
 TotalNetBandwidth=500000
 MaxDynamicBandwidth=80000
@@ -13,7 +14,8 @@ MinDynamicBandwidth=20000
 
 - Add to Config/DefaultEngine.ini:
 
-```
+```ini
+; Fix Network Rubberbanding Lag
 [/Script/Engine.Player]
 ConfiguredInternetSpeed=500000
 ConfiguredLanSpeed=500000
