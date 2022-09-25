@@ -12,28 +12,17 @@ UMultiplayerSessionsSubsystem::UMultiplayerSessionsSubsystem():
 	const IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get();
 	if (Subsystem) {
 		SessionInterface = Subsystem->GetSessionInterface();
-
-		if (GEngine) {
-			GEngine->AddOnScreenDebugMessage(
-				-1,
-				15.0f,
-				FColor::Blue,
-				FString::Printf(TEXT("Found subsystem: %s"), *Subsystem->GetSubsystemName().ToString())
-			);
-		}
-	} else {
-		UE_LOG(LogTemp, Error, TEXT("[MultipleSessions module] Cannot retrieve SessionInterface in MultiplayerSessionsSubsystem"));
 	}
 }
 
-void UMultiplayerSessionsSubsystem::CreateSession(int32 NumPublicConnections, FString MatchType)
+void UMultiplayerSessionsSubsystem::CreateSession(const int32 NumPublicConnections, const FString MatchType)
 {
 	if (!SessionInterface.IsValid()) {
 		UE_LOG(LogTemp, Error, TEXT("[MultipleSessions module] Cannot CreateSession. SessionInterface is not valid in MultiplayerSessionsSubsystem"));
 		return;
 	}
 
-	auto ExistingSession = SessionInterface->GetNamedSession(NAME_GameSession);
+	const FNamedOnlineSession* ExistingSession = SessionInterface->GetNamedSession(NAME_GameSession);
 	if (ExistingSession != nullptr) {
 		SessionInterface->DestroySession(NAME_GameSession);
 	}
@@ -48,6 +37,7 @@ void UMultiplayerSessionsSubsystem::CreateSession(int32 NumPublicConnections, FS
 	LastSessionSettings->bShouldAdvertise = true;
 	LastSessionSettings->bUsesPresence = true;
 	LastSessionSettings->bUseLobbiesIfAvailable = true;
+	LastSessionSettings->BuildUniqueId = 1;
 	LastSessionSettings->Set(MatchTypeKey, MatchType, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 
 	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
@@ -76,9 +66,9 @@ void UMultiplayerSessionsSubsystem::FindSessions(int32 MaxSearchResults)
 	LastSessionSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
 
 	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
-	const bool areSessionsFound = SessionInterface->FindSessions(*LocalPlayer->GetPreferredUniqueNetId(), LastSessionSearch.ToSharedRef());
+	const bool bSessionsFound = SessionInterface->FindSessions(*LocalPlayer->GetPreferredUniqueNetId(), LastSessionSearch.ToSharedRef());
 
-	if (!areSessionsFound) {
+	if (!bSessionsFound) {
 		SessionInterface->ClearOnFindSessionsCompleteDelegate_Handle(FindSessionsCompleteDelegateHandle);
 
 		// Notify that sessions were not found
@@ -97,9 +87,9 @@ void UMultiplayerSessionsSubsystem::JoinSession(const FOnlineSessionSearchResult
 	JoinSessionCompleteDelegateHandle = SessionInterface->AddOnJoinSessionCompleteDelegate_Handle(JoinSessionCompleteDelegate);
 
 	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
-	const bool bHasJoinedSession = SessionInterface->JoinSession(*LocalPlayer->GetPreferredUniqueNetId(), NAME_GameSession, SessionResult);
+	const bool bJoinedSession = SessionInterface->JoinSession(*LocalPlayer->GetPreferredUniqueNetId(), NAME_GameSession, SessionResult);
 
-	if (!bHasJoinedSession) {
+	if (!bJoinedSession) {
 		SessionInterface->ClearOnJoinSessionCompleteDelegate_Handle(JoinSessionCompleteDelegateHandle);
 
 		// Notify that did not join the session

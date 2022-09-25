@@ -2,10 +2,6 @@
 
 
 #include "MenuUserWidget.h"
-#include "MultiplayerSessionsSubsystem.h"
-#include "Interfaces/OnlineSessionInterface.h"
-// @todo Check if you need all these headers below
-#include "Components/Button.h"
 #include "OnlineSessionSettings.h"
 #include "OnlineSubsystem.h"
 
@@ -18,18 +14,19 @@ void UMenuUserWidget::MenuSetup(const int32 NumberOfPublicConnections, FString T
 	bIsFocusable = true;
 
 	const UWorld* World = GetWorld();
+	if (!World) {
+		return;
+	}
 
-	if (World) {
-		APlayerController* PlayerController = World->GetFirstPlayerController();
+	APlayerController* PlayerController = World->GetFirstPlayerController();
 
-		if (PlayerController) {
-			FInputModeUIOnly InputModeData;
-			InputModeData.SetWidgetToFocus(TakeWidget());
-			InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+	if (PlayerController) {
+		FInputModeUIOnly InputModeData;
+		InputModeData.SetWidgetToFocus(TakeWidget());
+		InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 
-			PlayerController->SetInputMode(InputModeData);
-			PlayerController->SetShowMouseCursor(true);
-		}
+		PlayerController->SetInputMode(InputModeData);
+		PlayerController->SetShowMouseCursor(true);
 	}
 
 	const UGameInstance* GameInstance = GetGameInstance();
@@ -63,31 +60,11 @@ bool UMenuUserWidget::Initialize()
 	return true;
 }
 
-void UMenuUserWidget::OnCreateSession(bool bWasSuccessful)
+void UMenuUserWidget::OnCreateSession(const bool bWasSuccessful)
 {
-	if (bWasSuccessful) {
-		if (GEngine) {
-			GEngine->AddOnScreenDebugMessage(
-				-1,
-				15.0f,
-				FColor::Yellow,
-				FString::Printf(TEXT("Session created successfully"))
-			);
-		}
-
-		UWorld* World = GetWorld();
-		if (World) {
-			World->ServerTravel("/Game/Levels/Lobby?listen");
-		}
-	} else {
-		if (GEngine) {
-			GEngine->AddOnScreenDebugMessage(
-				-1,
-				15.0f,
-				FColor::Red,
-				FString::Printf(TEXT("Failed to create session"))
-			);
-		}
+	UWorld* World = GetWorld();
+	if (bWasSuccessful && World) {
+		World->ServerTravel("/Game/Levels/Lobby?listen");
 	}
 }
 
@@ -116,19 +93,21 @@ void UMenuUserWidget::OnJoinSession(EOnJoinSessionCompleteResult::Type Result)
 	}
 
 	const IOnlineSessionPtr SessionInterface = Subsystem->GetSessionInterface();
-	
 	if (!SessionInterface.IsValid()) {
 		return;
 	}
 
 	FString Address;
-
-	if (SessionInterface->GetResolvedConnectString(NAME_GameSession, Address)) {
-		APlayerController* PlayerController = GetGameInstance()->GetFirstLocalPlayerController();
-		if (PlayerController) {
-			PlayerController->ClientTravel(Address, TRAVEL_Absolute);
-		}
+	if (!SessionInterface->GetResolvedConnectString(NAME_GameSession, Address)) {
+		return;
 	}
+
+	APlayerController* PlayerController = GetGameInstance()->GetFirstLocalPlayerController();
+	if (!PlayerController) {
+		return;
+	}
+
+	PlayerController->ClientTravel(Address, TRAVEL_Absolute);
 }
 
 void UMenuUserWidget::OnDestroySession(bool bWasSuccessful)
@@ -158,14 +137,18 @@ void UMenuUserWidget::MenuTearDown()
 	RemoveFromParent();
 
 	const UWorld* World = GetWorld();
-	if (World) {
-		APlayerController* PlayerController = World->GetFirstPlayerController();
-		if (PlayerController) {
-			const FInputModeGameOnly InputModeData;
-			PlayerController->SetInputMode(InputModeData);
-			PlayerController->SetShowMouseCursor(false);
-		}
+	if (!World) {
+		return;
 	}
+
+	APlayerController* PlayerController = World->GetFirstPlayerController();
+	if (!PlayerController) {
+		return;
+	}
+
+	const FInputModeGameOnly InputModeData;
+	PlayerController->SetInputMode(InputModeData);
+	PlayerController->SetShowMouseCursor(false);
 }
 
 void UMenuUserWidget::OnLevelRemovedFromWorld(ULevel* InLevel, UWorld* InWorld)

@@ -1,16 +1,11 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "MultiplayerSessionsSubsystem.h"
-#include "Blueprint/UserWidget.h"
 #include "Components/Button.h"
 #include "MenuUserWidget.generated.h"
 
-/**
- * 
- */
+
 UCLASS()
 class MULTIPLAYERSESSIONS_API UMenuUserWidget : public UUserWidget
 {
