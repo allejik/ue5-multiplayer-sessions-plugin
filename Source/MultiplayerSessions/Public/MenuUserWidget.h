@@ -13,7 +13,7 @@ class MULTIPLAYERSESSIONS_API UMenuUserWidget : public UUserWidget
 
 public:
 	UFUNCTION(BlueprintCallable)
-	void MenuSetup(FString TypeOfMatch, FString LobbyPath, int32 NumberOfPublicConnections = 4);
+	void MenuSetup(int32 NumberOfPublicConnections, FString TypeOfMatch, FString LobbyPath);
 
 protected:
 	virtual bool Initialize() override;

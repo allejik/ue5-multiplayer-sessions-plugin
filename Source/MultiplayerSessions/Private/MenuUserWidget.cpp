@@ -5,7 +5,7 @@
 #include "OnlineSessionSettings.h"
 #include "OnlineSubsystem.h"
 
-void UMenuUserWidget::MenuSetup(FString TypeOfMatch, const FString LobbyPath, const int32 NumberOfPublicConnections)
+void UMenuUserWidget::MenuSetup(const int32 NumberOfPublicConnections, FString TypeOfMatch, const FString LobbyPath)
 {
 	if (TypeOfMatch.IsEmpty()) {
 		UE_LOG(LogTemp, Error, TEXT("TypeOfMatch is empty"));
