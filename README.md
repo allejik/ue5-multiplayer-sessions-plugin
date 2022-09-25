@@ -27,4 +27,7 @@ MaxInternetClientRate=800000
   - Select WB_MenuUserWidget
   - Connect white pin to Event Begin Play
   - Create node "Menu Setup" from Return Value pin
+  - Set the number of public connections e.g. 4
+  - Set the type of match "FreeForAll"
+  - Set the paty to your level in Lobby Path e.g. "/Game/Levels/Lobby"
   - Connect white pin to MenuUserWidget
