@@ -81,14 +81,15 @@ bool UMenuUserWidget::Initialize()
 
 void UMenuUserWidget::OnCreateSession(const bool bWasSuccessful)
 {
-	UWorld* World = GetWorld();
-	if (!World) {
-		UE_LOG(LogTemp, Error, TEXT("World is empty"));
+	if (!bWasSuccessful) {
+		UE_LOG(LogTemp, Error, TEXT("Failed to create session"));
+		HostButton->SetIsEnabled(true);
 		return;
 	}
 
-	if (!bWasSuccessful) {
-		UE_LOG(LogTemp, Error, TEXT("Failed to create session"));
+	UWorld* World = GetWorld();
+	if (!World) {
+		UE_LOG(LogTemp, Error, TEXT("World is empty"));
 		return;
 	}
 
@@ -111,10 +112,20 @@ void UMenuUserWidget::OnFindSessions(const TArray<FOnlineSessionSearchResult>& S
 			return;
 		}
 	}
+
+	if (!bWasSuccessful || SessionResults.Num() == 0) {
+		JoinButton->SetIsEnabled(true);
+	}
 }
 
-void UMenuUserWidget::OnJoinSession(EOnJoinSessionCompleteResult::Type Result)
+void UMenuUserWidget::OnJoinSession(const EOnJoinSessionCompleteResult::Type Result)
 {
+	if (Result != EOnJoinSessionCompleteResult::Success) {
+		UE_LOG(LogTemp, Error, TEXT("Failed to join the session"));
+		JoinButton->SetIsEnabled(true);
+		return;
+	}
+	
 	const IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get();
 	if (!Subsystem) {
 		UE_LOG(LogTemp, Error, TEXT("Subsystem is empty"));
@@ -174,6 +185,7 @@ void UMenuUserWidget::OnStartSession(const bool bWasSuccessful)
 
 void UMenuUserWidget::HostButtonClicked()
 {
+	HostButton->SetIsEnabled(false);
 	if (!MultiplayerSessionsSubsystem) {
 		UE_LOG(LogTemp, Error, TEXT("MultiplayerSessionsSubsystem is empty"));
 		return;
@@ -184,6 +196,7 @@ void UMenuUserWidget::HostButtonClicked()
 
 void UMenuUserWidget::JoinButtonClicked()
 {
+	JoinButton->SetIsEnabled(false);
 	if (!MultiplayerSessionsSubsystem) {
 		UE_LOG(LogTemp, Error, TEXT("MultiplayerSessionsSubsystem is empty"));
 		return;
