@@ -79,3 +79,5 @@ MaxInternetClientRate=800000
   - Set the type of match "FreeForAll"
   - Set the paty to your level in Lobby Path e.g. "/Game/Levels/Lobby"
   - Connect white pin to MenuUserWidget
+
+  ![Alt text](/Resources/LevelBlueprint.JPG?raw=true "Title")
