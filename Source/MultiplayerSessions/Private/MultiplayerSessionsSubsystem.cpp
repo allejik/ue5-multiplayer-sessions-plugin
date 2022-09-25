@@ -17,14 +17,20 @@ UMultiplayerSessionsSubsystem::UMultiplayerSessionsSubsystem():
 
 void UMultiplayerSessionsSubsystem::CreateSession(const int32 NumPublicConnections, const FString MatchType)
 {
+	LastNumPublicConnections = NumPublicConnections;
+	LastMatchType = MatchType;
+
 	if (!SessionInterface.IsValid()) {
 		UE_LOG(LogTemp, Error, TEXT("SessionInterface is invalid"));
+		MultiplayerOnCreateSessionComplete.Broadcast(false);
 		return;
 	}
 
 	const FNamedOnlineSession* ExistingSession = SessionInterface->GetNamedSession(NAME_GameSession);
 	if (ExistingSession != nullptr) {
-		SessionInterface->DestroySession(NAME_GameSession);
+		bCreateSessionOnDestroy = true;
+		DestroySession();
+		return;
 	}
 
 	CreateSessionCompleteDelegateHandle = SessionInterface->AddOnCreateSessionCompleteDelegate_Handle(CreateSessionCompleteDelegate);
@@ -53,6 +59,7 @@ void UMultiplayerSessionsSubsystem::FindSessions(const int32 MaxSearchResults)
 {
 	if (!SessionInterface.IsValid()) {
 		UE_LOG(LogTemp, Error, TEXT("SessionInterface is invalid"));
+		MultiplayerOnFindSessionsComplete.Broadcast(TArray<FOnlineSessionSearchResult>(), false);
 		return;
 	}
 
@@ -95,6 +102,7 @@ void UMultiplayerSessionsSubsystem::DestroySession()
 {
 	if (!SessionInterface.IsValid()) {
 		UE_LOG(LogTemp, Error, TEXT("SessionInterface is invalid"));
+		MultiplayerOnDestroySessionComplete.Broadcast(false);
 		return;
 	}
 
@@ -111,6 +119,7 @@ void UMultiplayerSessionsSubsystem::StartSession()
 {
 	if (!SessionInterface.IsValid()) {
 		UE_LOG(LogTemp, Error, TEXT("SessionInterface is invalid"));
+		MultiplayerOnStartSessionComplete.Broadcast(false);
 		return;
 	}
 
@@ -159,6 +168,11 @@ void UMultiplayerSessionsSubsystem::OnDestroySessionComplete(FName SessionName, 
 {
 	if (SessionInterface) {
 		SessionInterface->ClearOnDestroySessionCompleteDelegate_Handle(DestroySessionCompleteDelegateHandle);
+	}
+
+	if (bWasSuccessful && bCreateSessionOnDestroy) {
+		bCreateSessionOnDestroy = false;
+		CreateSession(LastNumPublicConnections, LastMatchType);
 	}
 
 	MultiplayerOnDestroySessionComplete.Broadcast(bWasSuccessful);

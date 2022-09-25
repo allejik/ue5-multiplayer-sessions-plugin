@@ -5,8 +5,19 @@
 #include "OnlineSessionSettings.h"
 #include "OnlineSubsystem.h"
 
-void UMenuUserWidget::MenuSetup(const int32 NumberOfPublicConnections, FString TypeOfMatch)
+void UMenuUserWidget::MenuSetup(FString TypeOfMatch, const FString LobbyPath, const int32 NumberOfPublicConnections)
 {
+	if (TypeOfMatch.IsEmpty()) {
+		UE_LOG(LogTemp, Error, TEXT("TypeOfMatch is empty"));
+		return;
+	}
+
+	if (LobbyPath.IsEmpty()) {
+		UE_LOG(LogTemp, Error, TEXT("LobbyPath is empty"));
+		return;
+	}
+	
+	PathToLobby = FString::Printf(TEXT("%s?listen"), *LobbyPath);
 	NumPublicConnections = NumberOfPublicConnections;
 	MatchType = TypeOfMatch;
 	AddToViewport();
@@ -81,7 +92,7 @@ void UMenuUserWidget::OnCreateSession(const bool bWasSuccessful)
 		return;
 	}
 
-	World->ServerTravel("/Game/Levels/Lobby?listen");
+	World->ServerTravel(PathToLobby);
 }
 
 void UMenuUserWidget::OnFindSessions(const TArray<FOnlineSessionSearchResult>& SessionResults, bool bWasSuccessful)
