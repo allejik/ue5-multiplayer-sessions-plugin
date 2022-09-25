@@ -1,3 +1,30 @@
 # Multiplayer Sessions Plugin UE5
 
-Clone the content of repository into Plugins/MultiplayerSessions
+- Clone the content of repository into Plugins/MultiplayerSessions
+
+- Add to Config/DefaultGame.ini:
+
+```
+[/Script/Engine.GameNetworkManager]
+TotalNetBandwidth=500000
+MaxDynamicBandwidth=80000
+MinDynamicBandwidth=20000
+```
+
+- Add to Config/DefaultEngine.ini:
+
+```
+[/Script/Engine.Player]
+ConfiguredInternetSpeed=500000
+ConfiguredLanSpeed=500000
+
+[/Script/OnlineSubsystemUtils.IpNetDriver]
+MaxClientRate=800000
+MaxInternetClientRate=800000
+```
+- Add to level blueprint:
+  - Add node "Create Widget"
+  - Select WB_MenuUserWidget
+  - Connect white pin to Event Begin Play
+  - Create node "Menu Setup" from Return Value pin
+  - Connect white pin to MenuUserWidget
