@@ -1,6 +1,7 @@
 # Multiplayer Sessions Plugin UE5
 
-- Clone the content of repository into Plugins/MultiplayerSessions, e.g. `git clone git@github.com:allejik/ue5-multiplayer-sessions-plugin.git .`
+- Clone the content of repository into Plugins/MultiplayerSessions,<br>
+e.g. `git clone git@github.com:allejik/ue5-multiplayer-sessions-plugin.git .`
 
 - Add to Config/DefaultGame.ini:
 
