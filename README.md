@@ -1,4 +1,49 @@
-# Multiplayer Sessions Plugin UE5
+# Multiplayer Sessions Plugin UE5 Steam
+
+Adds a simple menu online system to connect via Steam.
+
+## Steps
+
+- Add to your **YOUR_PROJECT_NAME.uproject** file:
+```c
+{
+  ...
+  "Modules": [
+    {
+      ...
+      "AdditionalDependencies": [
+        ...
+        "UMG"
+      ]	
+    }
+  ],
+  "Plugins": [
+    ...
+    {
+      "Name": "OnlineSubsystem",
+      "Enabled": true
+    },
+    {
+      "Name": "OnlineSubsystemSteam",
+      "Enabled": true
+    }
+  ]
+}
+```
+
+- Add to your **YOUR_PROJECT_NAME.Build.cs** file: **"UMG"**, **"OnlineSubsystem"**, **"OnlineSubsystemSteam"**, e.g.
+```c
+PublicDependencyModuleNames.AddRange(new string[] {
+  ...
+  "UMG",
+  "OnlineSubsystem",
+  "OnlineSubsystemSteam",
+});
+```
+
+- Activate the following plugins in the editor:
+  - Enable Online Subsystem
+  - Enable Online Subsystem Steam
 
 - Clone the content of repository into Plugins/MultiplayerSessions,<br>
 e.g. `git clone git@github.com:allejik/ue5-multiplayer-sessions-plugin.git .`
