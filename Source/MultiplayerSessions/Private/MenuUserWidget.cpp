@@ -15,6 +15,7 @@ void UMenuUserWidget::MenuSetup(const int32 NumberOfPublicConnections, FString T
 
 	const UWorld* World = GetWorld();
 	if (!World) {
+		UE_LOG(LogTemp, Error, TEXT("World is empty"));
 		return;
 	}
 
@@ -32,6 +33,8 @@ void UMenuUserWidget::MenuSetup(const int32 NumberOfPublicConnections, FString T
 	const UGameInstance* GameInstance = GetGameInstance();
 	if (GameInstance) {
 		MultiplayerSessionsSubsystem = GameInstance->GetSubsystem<UMultiplayerSessionsSubsystem>();
+	} else {
+		UE_LOG(LogTemp, Error, TEXT("GameInstance is empty"));
 	}
 
 	if (MultiplayerSessionsSubsystem) {
@@ -46,15 +49,20 @@ void UMenuUserWidget::MenuSetup(const int32 NumberOfPublicConnections, FString T
 bool UMenuUserWidget::Initialize()
 {
 	if (!Super::Initialize()) {
+		UE_LOG(LogTemp, Error, TEXT("Failed to initialize"));
 		return false;
 	}
 
 	if (HostButton) {
 		HostButton->OnClicked.AddDynamic(this, &ThisClass::HostButtonClicked);
+	} else {
+		UE_LOG(LogTemp, Warning, TEXT("HostButton is empty"));
 	}
 
 	if (JoinButton) {
 		JoinButton->OnClicked.AddDynamic(this, &ThisClass::JoinButtonClicked);
+	} else {
+		UE_LOG(LogTemp, Warning, TEXT("JoinButton is empty"));
 	}
 
 	return true;
@@ -63,14 +71,23 @@ bool UMenuUserWidget::Initialize()
 void UMenuUserWidget::OnCreateSession(const bool bWasSuccessful)
 {
 	UWorld* World = GetWorld();
-	if (bWasSuccessful && World) {
-		World->ServerTravel("/Game/Levels/Lobby?listen");
+	if (!World) {
+		UE_LOG(LogTemp, Error, TEXT("World is empty"));
+		return;
 	}
+
+	if (!bWasSuccessful) {
+		UE_LOG(LogTemp, Error, TEXT("Failed to create session"));
+		return;
+	}
+
+	World->ServerTravel("/Game/Levels/Lobby?listen");
 }
 
 void UMenuUserWidget::OnFindSessions(const TArray<FOnlineSessionSearchResult>& SessionResults, bool bWasSuccessful)
 {
 	if (MultiplayerSessionsSubsystem == nullptr) {
+		UE_LOG(LogTemp, Error, TEXT("MultiplayerSessionsSubsystem is empty"));
 		return;
 	}
 
@@ -89,47 +106,79 @@ void UMenuUserWidget::OnJoinSession(EOnJoinSessionCompleteResult::Type Result)
 {
 	const IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get();
 	if (!Subsystem) {
+		UE_LOG(LogTemp, Error, TEXT("Subsystem is empty"));
 		return;
 	}
 
 	const IOnlineSessionPtr SessionInterface = Subsystem->GetSessionInterface();
 	if (!SessionInterface.IsValid()) {
+		UE_LOG(LogTemp, Error, TEXT("SessionInterface is invalid"));
 		return;
 	}
 
 	FString Address;
 	if (!SessionInterface->GetResolvedConnectString(NAME_GameSession, Address)) {
+		UE_LOG(LogTemp, Error, TEXT("Failed to retrieve platform specific connection information for joining the match"));
 		return;
 	}
 
 	APlayerController* PlayerController = GetGameInstance()->GetFirstLocalPlayerController();
 	if (!PlayerController) {
+		UE_LOG(LogTemp, Error, TEXT("FirstLocalPlayerController is empty"));
 		return;
 	}
 
 	PlayerController->ClientTravel(Address, TRAVEL_Absolute);
 }
 
-void UMenuUserWidget::OnDestroySession(bool bWasSuccessful)
+void UMenuUserWidget::OnDestroySession(const bool bWasSuccessful)
 {
+	if (!MultiplayerSessionsSubsystem) {
+		UE_LOG(LogTemp, Error, TEXT("MultiplayerSessionsSubsystem is empty"));
+		return;
+	}
+
+	if (!bWasSuccessful) {
+		UE_LOG(LogTemp, Error, TEXT("Failed to destroy session"));
+		return;
+	}
+
+	MultiplayerSessionsSubsystem->DestroySession();
 }
 
-void UMenuUserWidget::OnStartSession(bool bWasSuccessful)
+void UMenuUserWidget::OnStartSession(const bool bWasSuccessful)
 {
+	if (!MultiplayerSessionsSubsystem) {
+		UE_LOG(LogTemp, Error, TEXT("MultiplayerSessionsSubsystem is empty"));
+		return;
+	}
+
+	if (!bWasSuccessful) {
+		UE_LOG(LogTemp, Error, TEXT("Failed to start session"));
+		return;
+	}
+
+	MultiplayerSessionsSubsystem->StartSession();
 }
 
 void UMenuUserWidget::HostButtonClicked()
 {
-	if (MultiplayerSessionsSubsystem) {
-		MultiplayerSessionsSubsystem->CreateSession(NumPublicConnections, MatchType);
+	if (!MultiplayerSessionsSubsystem) {
+		UE_LOG(LogTemp, Error, TEXT("MultiplayerSessionsSubsystem is empty"));
+		return;
 	}
+
+	MultiplayerSessionsSubsystem->CreateSession(NumPublicConnections, MatchType);
 }
 
 void UMenuUserWidget::JoinButtonClicked()
 {
-	if (MultiplayerSessionsSubsystem) {
-		MultiplayerSessionsSubsystem->FindSessions(10'000);
+	if (!MultiplayerSessionsSubsystem) {
+		UE_LOG(LogTemp, Error, TEXT("MultiplayerSessionsSubsystem is empty"));
+		return;
 	}
+	
+	MultiplayerSessionsSubsystem->FindSessions(10'000);
 }
 
 void UMenuUserWidget::MenuTearDown()
@@ -138,11 +187,13 @@ void UMenuUserWidget::MenuTearDown()
 
 	const UWorld* World = GetWorld();
 	if (!World) {
+		UE_LOG(LogTemp, Error, TEXT("World is empty"));
 		return;
 	}
 
 	APlayerController* PlayerController = World->GetFirstPlayerController();
 	if (!PlayerController) {
+		UE_LOG(LogTemp, Error, TEXT("FirstPlayerController is empty"));
 		return;
 	}
 

@@ -18,7 +18,7 @@ UMultiplayerSessionsSubsystem::UMultiplayerSessionsSubsystem():
 void UMultiplayerSessionsSubsystem::CreateSession(const int32 NumPublicConnections, const FString MatchType)
 {
 	if (!SessionInterface.IsValid()) {
-		UE_LOG(LogTemp, Error, TEXT("[MultipleSessions module] Cannot CreateSession. SessionInterface is not valid in MultiplayerSessionsSubsystem"));
+		UE_LOG(LogTemp, Error, TEXT("SessionInterface is invalid"));
 		return;
 	}
 
@@ -51,10 +51,10 @@ void UMultiplayerSessionsSubsystem::CreateSession(const int32 NumPublicConnectio
 	}
 }
 
-void UMultiplayerSessionsSubsystem::FindSessions(int32 MaxSearchResults)
+void UMultiplayerSessionsSubsystem::FindSessions(const int32 MaxSearchResults)
 {
 	if (!SessionInterface.IsValid()) {
-		UE_LOG(LogTemp, Error, TEXT("[MultipleSessions module] Cannot FindSessions. SessionInterface is not valid in MultiplayerSessionsSubsystem"));
+		UE_LOG(LogTemp, Error, TEXT("SessionInterface is invalid"));
 		return;
 	}
 
@@ -79,7 +79,7 @@ void UMultiplayerSessionsSubsystem::FindSessions(int32 MaxSearchResults)
 void UMultiplayerSessionsSubsystem::JoinSession(const FOnlineSessionSearchResult& SessionResult)
 {
 	if (!SessionInterface.IsValid()) {
-		UE_LOG(LogTemp, Error, TEXT("[MultipleSessions module] Cannot JoinSession. SessionInterface is not valid in MultiplayerSessionsSubsystem"));
+		UE_LOG(LogTemp, Error, TEXT("SessionInterface is invalid"));
 		MultiplayerOnJoinSessionComplete.Broadcast(EOnJoinSessionCompleteResult::UnknownError);
 		return;
 	}
